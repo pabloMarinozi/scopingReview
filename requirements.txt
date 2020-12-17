@@ -20,7 +20,7 @@ dnspython==1.16.0
 #entrypoints==0.3
 #gencpp==0.6.0
 #geneus==2.2.6
-genlisp==0.4.16
+#genlisp==0.4.16
 genmsg==0.5.10
 gennodejs==2.0.1
 gitdb==4.0.5
