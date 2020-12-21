@@ -40,13 +40,14 @@ def mostrarPantallaSeleccionEstudios(user):
         if paper is not None:
             st.write("Lea el título y abstract del siguiente artículo y marque si cumple alguna de las siguientes condiciones.")
             if paper.title is not None:
-                 st.markdown("#### Título")
-                 st.write(paper.title)
+                st.markdown("#### Título")
+                st.write(paper.title)
+            if paper.abstract is not None:
+                st.markdown("#### Abstract")
+                st.write(paper.abstract)
             if paper.doi is not None:
                 st.markdown("#### Doi")
                 st.markdown("["+paper.doi+"](https://doi.org/"+paper.doi+")")
-            if paper.abstract is None:
-                paper.abstract = ""
             if st.button("Cambiar paper"):
                 os.remove("inclusion")
             st.markdown("#### Criterios")
