@@ -101,9 +101,10 @@ def mostrarPantallaSeleccionEstudios(user):
                         paper.user_inclusion2 = user
                     st.success("Se ha guardado su decisión de incluir el artículo "+ paper.title)
                 paper.save()
-                st.json(paper.to_json())
                 if st.button("Revisar otro paper"):
-                        os.remove("inclusion")
+                    os.remove("inclusion")
+                st.json(paper.to_json())
+                
         else: 
             st.error("No existen más papers en la base de datos que usted pueda verificar sin introducir un sesgo en el review.")
        
