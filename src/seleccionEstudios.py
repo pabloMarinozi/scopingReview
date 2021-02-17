@@ -23,11 +23,12 @@ def mostrarPantallaSeleccionEstudios(user):
             mostrarAvance(True)
         if os.path.exists("inclusion"):
             with open('inclusion', 'r') as fp:
+                #print("el archivo no se borro")
                 paper_dict = json.loads(json.load(fp))
                 paper = Paper.objects.get(doi=paper_dict["_id"])
                 if paper.inclusion1 is None: number = 1
                 else:
-                    if paper.user_inclusion1 == user:
+                    if paper.user_inclusion1 == user or paper.inclusion2 is not None:
                         os.remove("inclusion")
                         paper, number = elegirPaper(user)
                     with open('inclusion', 'w') as fp:
@@ -35,6 +36,7 @@ def mostrarPantallaSeleccionEstudios(user):
                     number=2
         else:
             paper, number = elegirPaper(user)
+            #print("eligió el paper "+paper.title)
             with open('inclusion', 'w') as fp:
                 json.dump(paper.to_json(), fp)
         if paper is not None:
@@ -66,7 +68,7 @@ def mostrarPantallaSeleccionEstudios(user):
                 ci2 = st.checkbox("2. El estudio NO se enfoca en la medición de variables de interés vitícola indistintamente de la ubicación geográfica y el sistema de conducción de los viñedos y del varietal y propósito de comercialización de las uvas.")
             with col2: 
                 st.markdown("##### Exclusión")
-                ce1 = st.checkbox("1.  El estudio utiliza como entrada imágenes en las que la resolución de un pixel es mayor a un metro.")
+                ce1 = st.checkbox("1.  El estudio utiliza como entrada imágenes satelitales.")
                 ce2 = st.checkbox("2.  El algoritmo opera sobre información electromagnética que NO viene en forma de imagen (entiéndase representación visual bidimensional a partir de una matriz numérica).")
                 ce3 = st.checkbox("3.  El paper está orientado a automatismo de la gestión, NO a medición de variables.")
                 ce4 = st.checkbox("4.  El estudio NO está escrito en Inglés.")
@@ -108,6 +110,8 @@ def mostrarPantallaSeleccionEstudios(user):
                     st.success("Se ha guardado su decisión de incluir el artículo "+ paper.title)
                 paper.save()
                 if st.button("Revisar otro paper"):
+                    del paper.on_revision
+                    paper.save()
                     os.remove("inclusion")
                 st.json(paper.to_json())
                 
@@ -120,15 +124,16 @@ def elegirPaper(user):
     papers = list(Paper.objects(on_revision=user))
     if papers:
         paper = random.choice(papers)
-        paper = random.choice(papers)
         if paper.inclusion1 is None: number = 1
         else: number=2
+        #print("opcion1")
         return paper,number
     papers = list(Paper.objects(Q(inclusion2__exists=False) & Q(user_inclusion1__ne=user) & Q(on_revision__exists=False)))
     if papers:
         paper = random.choice(papers)
         if paper.inclusion1 is None: number = 1
         else: number=2
+        #print("opcion2")
         return paper,number
     else:
         return None,None
