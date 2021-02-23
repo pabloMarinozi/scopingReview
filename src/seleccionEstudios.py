@@ -65,7 +65,7 @@ def mostrarPantallaSeleccionEstudios(user):
             with col1:
                 st.markdown("##### Inclusión")
                 ci1 = st.checkbox("1. El estudio NO utiliza algún proceso de extracción de información automatizado sobre imágenes de cualquier región del espectro electromagnético en alguna de sus etapas.")
-                ci2 = st.checkbox("2. El estudio NO se enfoca en la medición de variables de interés vitícola indistintamente de la ubicación geográfica y el sistema de conducción de los viñedos y del varietal y propósito de comercialización de las uvas.")
+                ci2 = st.checkbox("2. El estudio NO se enfoca en la medición de variables visuales de interés vitícola. Entendemos por esto a toda información necesaria para la toma de decisiones agronómica que se manifiesta de forma visual en alguna parte de la planta de vid.")
             with col2: 
                 st.markdown("##### Exclusión")
                 ce1 = st.checkbox("1.  El estudio utiliza como entrada imágenes satelitales.")
@@ -73,6 +73,8 @@ def mostrarPantallaSeleccionEstudios(user):
                 ce3 = st.checkbox("3.  El paper está orientado a automatismo de la gestión, NO a medición de variables.")
                 ce4 = st.checkbox("4.  El estudio NO está escrito en Inglés.")
                 ce5 = st.checkbox("5.  La publicación del estudio NO se sometió a un proceso de revisión por pares.")
+            st.markdown("#### Comentarios")
+            comments = st.text_area("En el caso de que tenga alguna duda con la decisión qué tomó, vuelquela en el siguiente apartado para que sea tenida en cuenta en la próxima reunión. (Si no hay texto se asume que se ha tomado la decision con plena confidencia)")
             guardar = st.button("Guardar")
             if show_warning:
                 st.warning("El paper a revisar ha cambiado. \n"+  "Desplácese hacia arriba para analizar su contenido. \n"+ 
@@ -92,10 +94,12 @@ def mostrarPantallaSeleccionEstudios(user):
                         paper.inclusion1 = False
                         paper.user_inclusion1 = user
                         paper.criteria_inclusion1 = criteria
+                        if comments is not None: paper.comments1 = comments
                     if number == 2:
                         paper.inclusion2 = False
                         paper.user_inclusion2 = user
                         paper.criteria_inclusion2 = criteria
+                        if comments is not None: paper.comments2 = comments
                     mess = "Se ha guardado su decisión de excluir el artículo "+ paper.title+" ya que hay conflictos con los siguientes criterios: "
                     for cr in criteria:
                         mess = mess + "\n " + cr
@@ -104,9 +108,11 @@ def mostrarPantallaSeleccionEstudios(user):
                     if number == 1:
                         paper.inclusion1 = True
                         paper.user_inclusion1 = user
+                        if comments is not None: paper.comments1 = comments
                     if number == 2:
                         paper.inclusion2 = True
                         paper.user_inclusion2 = user
+                        if comments is not None: paper.comments2 = comments
                     st.success("Se ha guardado su decisión de incluir el artículo "+ paper.title)
                 paper.save()
                 if st.button("Revisar otro paper"):
