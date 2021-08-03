@@ -1,4 +1,7 @@
 paper
+mongoengine/
+inclusion
+user_selected
 publication
 financement
 affiliations_def
@@ -13,3 +16,4 @@ features
 algorithms
 caracteristicas
 src/__pycache__
+src/inclusiones.py

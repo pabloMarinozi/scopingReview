@@ -13,7 +13,7 @@ import clases,curacionBibliografica,extraccionDeDatos,opciones,exceptions
 from PIL import Image
 import opciones as op
 from seleccionEstudios import mostrarPantallaSeleccionEstudios
-from curacionBibliografica import mostrarPantallaCuracionBibliografica
+from curacionBibliografica import automatizarCarga, mostrarPantallaCuracionBibliografica
 from extraccionDeDatos import mostrarSeccionExtracción
 from cargaInicial import mostrarSeccionCarga
 
@@ -60,7 +60,7 @@ if pantalla == "Seleccionar...":
         st.image(image)
             
 if pantalla == 'Datos Bibliográficos':
-    mostrarPantallaCuracionBibliografica(user)
+    mostrarPantallaCuracionBibliografica()
 if pantalla == "Selección de Estudios":
     mostrarPantallaSeleccionEstudios(user)
 if pantalla == "Contenido del Paper":

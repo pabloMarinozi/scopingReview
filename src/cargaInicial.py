@@ -2,12 +2,12 @@ import streamlit as st
 import json
 from io import StringIO  
 from pybtex.database import parse_string 
-from mongoengine import disconnect,connect
+from datosConexion import conectarBd
 from clases import Paper
 
+
 def mostrarSeccionCarga():
-    disconnect()
-    connect('scopingReview',host="mongodb+srv://admin:LccNwXd87QkFzvu@cluster0.w9zqf.mongodb.net/scopingReview?retryWrites=true&w=majority", alias='default')
+    conectarBd()
     uploaded_file = st.file_uploader("Archivo Bibtex con la información de los papers")
     before = len(Paper.objects)
     if uploaded_file is not None:
@@ -26,13 +26,14 @@ def mostrarSeccionCarga():
             fields = entry.fields
             title = fields["title"].replace('{', '').replace('}', '')
             doi = fields.get("doi")
+            isOnlyReference = False
             loaded+=1
             my_bar.progress(loaded/total)
             if doi is None: 
                 notdoi.append(title)
                 continue
             abstract = fields.get("abstract","")
-            paper = Paper(title = title, doi = doi , abstract = abstract).save()
+            paper = Paper(title = title, doi = doi , abstract = abstract, isOnlyReference = isOnlyReference).save()
             papers.append(paper)
             
         after = len(Paper.objects)
