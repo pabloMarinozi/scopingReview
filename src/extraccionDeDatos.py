@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import opciones as op
@@ -7,14 +6,12 @@ import os.path
 import json
 from shutil import copyfile
 from exceptions import InputError
-from mongoengine import disconnect,connect
+from datosConexion import conectarBd
 from clases import Paper,Visual_Task,Visual_Feature
 
 
 def mostrarSeccionExtracción(user):
-    disconnect()
-    connect('scopingReview',host="mongodb+srv://admin:LccNwXd87QkFzvu@cluster0.w9zqf.mongodb.net/scopingReview?retryWrites=true&w=majority", alias='default')
-    st.title('Extracción de Datos')
+    conectarBd()
     
     col1, col2 = st.beta_columns(2)
     opciones = buscarOpcionesCargadas()
@@ -33,23 +30,32 @@ def mostrarSeccionExtracción(user):
                 os.remove("paper_selected")
         else:
             st.markdown("## Seleccionar artículo  para extraer datos.")
-            doi = st.text_input(label="Ingrese el doi del artículo en su formato url. Por ejemplo:https://doi.org/10.1109/CVPR.2016.609")
+            doi = st.text_input(label="Ingrese el doi del artículo en su formato url. Por ejemplo: doi.org/10.1109/CVPR.2016.609")
             if st.button(label="Buscar"):
                 paper = None
                 try:
                     badflag=False
                     paper = Paper.objects.get(doi=doi)
                     st.success("Se encontró un paper con título:\n"+'**"'+paper.title+'"**')
-                    if paper.research_goal is not None or \
-                    paper.practical_contibution is not None or \
-                    paper.viticultural_aspects is not None:
-                        st.error("El paper encontrado tiene cargadas las características de la investigación")
+                    goals = paper.research_goal
+                    if goals: 
+                        st.error("El paper encontrado tiene cargadas el objetivo de la investigación")
                         st.write("Objetivo de la investigación: ")
-                        st.write(paper.research_goal)
+                        for goal in goals:
+                            st.write(paper.research_goal)
+                        badflag = True
+                   
+                    if paper.practical_contibution is not None :
+                        st.error("El paper encontrado tiene cargadas Aportes Prácticos de la investigación")
                         st.write("Aporte práctico: "+ paper.practical_contibution)
+                        badflag = True
+                    
+                    if paper.viticultural_aspects is not None:
+                        st.error("El paper encontrado tiene cargadas Aspectos Vitícolas de la investigación")
                         st.write("Aspectos Vitícolas: " + paper.viticultural_aspects)
                         badflag = True
-                    if paper.visual_tasks is not None:
+                    tasks= paper.visual_tasks
+                    if tasks:
                         st.error("El paper encontrado tiene cargadas las tareas visuales")
                         visual_to_show = []
                         for task in paper.visual_tasks:
@@ -57,10 +63,12 @@ def mostrarSeccionExtracción(user):
                         st.write(visual_to_show)
                         badflag=True
                     if not badflag:
+                        st.success("El paper seleccionado esta en condiciones para llevar adelante la carga\n")
                         with open('paper_selected', 'w') as fp:
                             json.dump(paper.to_json(), fp)
                         st.write("Continue con la extracción y los datos ingresados se asociarán a este paper.")
                         st.json(paper.to_json())
+                    else: st.error("El paper seleccionado NO esta en condiciones para llevar adelante la carga. Contactese con el administrador de su Base de Datos.\n")
                 except Paper.MultipleObjectsReturned:
                     st.write("Al parecer, hay más de un paper con el doi ingresado.")
                     papers = Paper.objects(doi=doi)
@@ -70,7 +78,7 @@ def mostrarSeccionExtracción(user):
                     name = st.selectbox(label="Elija el que usted quiera analizar", options=names)
                     paper = Paper.objects(doi=doi, names=name)[0]
                 except Paper.DoesNotExist:
-                    st.error("No existe ningun paper con el doi ingresado en la base de datos")
+                    st.error("No existe ningun paper con el doi ingresado en la base de datos.")
     
     if seccion == "Tareas visuales":
         if os.path.exists("tareas_def"):
@@ -521,7 +529,6 @@ def buscarOpcionesCargadas():
                 elif feature.type == "Latent":
                     opciones["visual_features_latent_list"].add(feature.name)
                 else: opciones["visual_features_deep_list"].add(feature.name)
-    
     return opciones
     
                 

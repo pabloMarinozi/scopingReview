@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os.path
+import os.path #Este modulo nos permite gestionar diferentes opciones relativas al sistema de ficheros como pueden ser ficheros, directorios, etc.
 import pickle
 import json
 import random
@@ -9,16 +9,14 @@ import opciones as op
 import streamlit as st
 from datetime import date
 from shutil import copyfile
-from mongoengine import disconnect,connect,Q
+from datosConexion import conectarBd
 from exceptions import InputError
 from clases import Paper
+from mongoengine import Q
 
-def mostrarPantallaSeleccionEstudios(user):
+def mostrarPantallaSeleccionEstudios(user): #FALTAN CONDICIONES DE REFERENCIAS Y LOADBEFORE
     if user != "Seleccionar..." and user is not None:
-        disconnect()
-        
-        connect('scopingReview',host="mongodb+srv://admin:LccNwXd87QkFzvu@cluster0.w9zqf.mongodb.net/scopingReview?retryWrites=true&w=majority", alias='default')
-        st.title('Selección de Estudios')
+        conectarBd()
         if st.checkbox("Ver avance"):
             mostrarAvance(True)
         if os.path.exists("inclusion"):
@@ -46,19 +44,19 @@ def mostrarPantallaSeleccionEstudios(user):
             st.error("No existen más papers en la base de datos que usted pueda verificar sin introducir un sesgo en el review.")
         else:
             show_warning = False
-            if paper.on_revision is not None: st.success("Este paper fue recuperado de una sesión incompleta anterior.") 
+            if paper.on_revision is not None: st.success("Este paper fue recuperado de una sesión incompleta anterior.") #muestra mensaje de exito
             else:
                 show_warning = True
                 paper.on_revision = user
                 paper.save()
             st.write("Lea el título y abstract del siguiente artículo y marque si cumple alguna de las siguientes condiciones.")
-            if paper.title is not None:
-                st.markdown("#### Título")
+            if paper.title is not None: 
+                st.markdown("#### Título") 
                 st.write(paper.title)
-            if paper.abstract is not None:
-                st.markdown("#### Abstract")
+            if paper.abstract is not None: 
+                st.markdown("#### Abstract") 
                 st.write(paper.abstract)
-            if paper.doi is not None:
+            if paper.doi is not None: 
                 st.markdown("#### Doi")
                 st.markdown("["+paper.doi+"](https://doi.org/"+paper.doi+")")
             if st.button("Cambiar paper"):
@@ -66,8 +64,8 @@ def mostrarPantallaSeleccionEstudios(user):
                 paper.save()
                 os.remove("inclusion")
             st.markdown("#### Criterios")
-            col1, col2 = st.beta_columns(2)
-            with col1:
+            col1, col2 = st.beta_columns(2) 
+            with col1: 
                 st.markdown("##### Inclusión")
                 ci1 = st.checkbox("1. El estudio NO utiliza algún proceso de extracción de información automatizado sobre imágenes de cualquier región del espectro electromagnético en alguna de sus etapas.")
                 ci2 = st.checkbox("2. El estudio NO se enfoca en la medición de variables visuales de interés vitícola. Entendemos por esto a toda información necesaria para la toma de decisiones agronómica que se manifiesta de forma visual en alguna parte de la planta de vid.")
@@ -78,13 +76,13 @@ def mostrarPantallaSeleccionEstudios(user):
                 ce3 = st.checkbox("3.  El paper está orientado a automatismo de la gestión, NO a medición de variables.")
                 ce4 = st.checkbox("4.  El estudio NO está escrito en Inglés.")
                 ce5 = st.checkbox("5.  La publicación del estudio NO se sometió a un proceso de revisión por pares.")
-            st.markdown("#### Comentarios")
-            comments = st.text_area("En el caso de que tenga alguna duda con la decisión qué tomó, vuelquela en el siguiente apartado para que sea tenida en cuenta en la próxima reunión. (Si no hay texto se asume que se ha tomado la decision con plena confidencia)")
-            guardar = st.button("Guardar")
-            if show_warning:
+            st.markdown("#### Comentarios") 
+            comments = st.text_area("En el caso de que tenga alguna duda con la decisión qué tomó, vuelquela en el siguiente apartado para que sea tenida en cuenta en la próxima reunión. (Si no hay texto se asume que se ha tomado la decision con plena confidencia)") #text area para colocar el comentario
+            guardar = st.button("Guardar") 
+            if show_warning: 
                 st.warning("El paper a revisar ha cambiado. \n"+  "Desplácese hacia arriba para analizar su contenido. \n"+ 
-                           "Asegúrese de no presionar el botón 'Guardar' hasta modificar los checkboxes de acuerdo a su revisión.")
-            if guardar:
+                           "Asegúrese de no presionar el botón 'Guardar' hasta modificar los checkboxes de acuerdo a su revisión.") 
+            if guardar: 
                 del paper.on_revision
                 if ci1 or ci2 or ce1 or ce2 or ce3 or ce4 or ce5:
                     criteria =[]
@@ -109,7 +107,7 @@ def mostrarPantallaSeleccionEstudios(user):
                     for cr in criteria:
                         mess = mess + "\n " + cr
                     st.success(mess)
-                else:    
+                else: 
                     if number == 1:
                         paper.inclusion1 = True
                         paper.user_inclusion1 = user
@@ -117,27 +115,24 @@ def mostrarPantallaSeleccionEstudios(user):
                     if number == 2:
                         paper.inclusion2 = True
                         paper.user_inclusion2 = user
-                        if comments is not None: paper.comments2 = comments
-                    st.success("Se ha guardado su decisión de incluir el artículo "+ paper.title)
+                        if comments is not None: paper.comments2 = comments 
+                    st.success("Se ha guardado su decisión de incluir el artículo "+ paper.title) 
                 paper.save()
-                if st.button("Revisar otro paper"):
-                    del paper.on_revision
-                    paper.save()
-                    os.remove("inclusion")
+                if st.button("Revisar otro paper"): 
+                    del paper.on_revision 
+                    paper.save() 
+                    os.remove("inclusion") 
                 st.json(paper.to_json())
-                
-      
-
 #@st.cache(allow_output_mutation=True)                    
 def elegirPaper(user):
     papers = list(Paper.objects(on_revision=user))
     if papers:
-        paper = random.choice(papers)
+        paper = random.choice(papers) #permite elegir un elementos de una lista (en este caso la lista de papers)
         if paper.inclusion1 is None: number = 1
         else: number=2
         #print("opcion1")
         return paper,number
-    papers = list(Paper.objects(Q(inclusion2__exists=False) & Q(user_inclusion1__ne=user) & Q(on_revision__exists=False)))
+    papers = list(Paper.objects(Q(inclusion2__exists=False) & Q(user_inclusion1__ne=user) & Q(on_revision__exists=False) & Q(isOnlyReference=False)))
     if papers:
         paper = random.choice(papers)
         if paper.inclusion1 is None: number = 1
@@ -173,16 +168,3 @@ def mostrarAvance(users_distribution):
         plt.yticks(y,list(revisions.keys()))
         plt.xticks(list(revisions.values()))
         st.pyplot(plt.show())
-    
-    
-    
-    
-            
-            
-        
-    
-    
-    
-
-
-    

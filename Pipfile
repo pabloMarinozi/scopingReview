@@ -5,12 +5,20 @@ name = "pypi"
 
 [packages]
 mongoengine = "*"
-pymongo = {extras = ["srv"], version = "*"}
 pybtex = "*"
 matplotlib = "*"
 streamlit = "*"
+requests = "*"
+dnspython = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.8"
+
+[packages.pymongo]
+extras = [ "srv",]
+version = "*"
+
+[packages.e54e73a]
+path = "./mongoengine"
