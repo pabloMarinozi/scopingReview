@@ -22,24 +22,29 @@ def mostrarPantallaSeleccionEstudios(user):
         if st.checkbox("Ver avance"):
             mostrarAvance(True)
         if os.path.exists("inclusion"):
-            with open('inclusion', 'r') as fp:
-                #print("el archivo no se borro")
-                paper_dict = json.loads(json.load(fp))
-                paper = Paper.objects.get(doi=paper_dict["_id"])
-                if paper.inclusion1 is None: number = 1
-                else:
-                    if paper.user_inclusion1 == user or paper.inclusion2 is not None:
-                        os.remove("inclusion")
-                        paper, number = elegirPaper(user)
-                    with open('inclusion', 'w') as fp:
-                        json.dump(paper.to_json(), fp)
-                    number=2
+            try:
+                with open('inclusion', 'r') as fp:
+                    paper_dict = json.loads(json.load(fp))
+                    paper = Paper.objects.get(doi=paper_dict["_id"])
+                    if paper.inclusion1 is None: number = 1
+                    else:
+                        if paper.user_inclusion1 == user or paper.inclusion2 is not None:
+                            os.remove("inclusion")
+                            paper, number = elegirPaper(user)
+                        with open('inclusion', 'w') as fp:
+                            json.dump(paper.to_json(), fp)
+                        number=2
+            except: #el archivo inclusion está corrupto y se debe eliminar 
+                os.remove("inclusion")
+                paper = None
         else:
             paper, number = elegirPaper(user)
-            #print("eligió el paper "+paper.title)
-            with open('inclusion', 'w') as fp:
-                json.dump(paper.to_json(), fp)
-        if paper is not None:
+            if paper is not None:
+                with open('inclusion', 'w') as fp:
+                    json.dump(paper.to_json(), fp)
+        if paper is None:
+            st.error("No existen más papers en la base de datos que usted pueda verificar sin introducir un sesgo en el review.")
+        else:
             show_warning = False
             if paper.on_revision is not None: st.success("Este paper fue recuperado de una sesión incompleta anterior.") 
             else:
@@ -121,9 +126,7 @@ def mostrarPantallaSeleccionEstudios(user):
                     os.remove("inclusion")
                 st.json(paper.to_json())
                 
-        else: 
-            st.error("No existen más papers en la base de datos que usted pueda verificar sin introducir un sesgo en el review.")
-       
+      
 
 #@st.cache(allow_output_mutation=True)                    
 def elegirPaper(user):
