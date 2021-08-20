@@ -9,6 +9,7 @@ pymongo = {extras = ["srv"], version = "*"}
 pybtex = "*"
 matplotlib = "*"
 streamlit = "*"
+crossref-commons = "*"
 
 [dev-packages]
 
