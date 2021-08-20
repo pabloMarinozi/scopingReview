@@ -32,7 +32,8 @@ def automatizarCarga(papers):
         with open('mensajes.txt', 'a') as f:
             try:
                 test=get_entity(paper.doi, EntityType.PUBLICATION, OutputType.JSON)
-                st.write(test['title'][0])
+                st.success("Se cargará el paper con título:\n"+'**"'+test['title'][0]+'"**')
+                #st.write(test['title'][0])
             except:
                 f.write('Fallo la Busqueda del Paper \n')
             if test['created']['date-parts'][0][1] is not None:

@@ -30,7 +30,8 @@ class Visual_Task(EmbeddedDocument):
     viticultural_variable = ListField(StringField(max_length=50))
     viticultural_variable_details = StringField()
     monitoring = BooleanField(required=True)
-    
+    variety = ListField(StringField())
+    driving_systems = ListField(StringField())
     
 class Institution(Document):
     name = StringField(required=True, primary_key=True) #affiliation[]
@@ -85,3 +86,5 @@ class Paper(Document):
     #isLoadedBefore = BooleanField()
     bibliographyIsLoaded = BooleanField()
     references = ListField(StringField())
+    #research_goal = ListField(StringField()) VARIETALES
+    #research_goal = ListField(StringField()) SISTEMAS DE CONDUCCION
