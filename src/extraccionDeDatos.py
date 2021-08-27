@@ -108,6 +108,7 @@ def mostrarSeccionExtracción(user):
                 sub = st.radio("Subsecciones", ["Información Vitícola","Dataset","Features", "Algoritmos"])
                 if st.button("1) Agregar tarea visual a la lista"):
                     cargarTarea(task)
+                mostrarTareas()
                 if st.button("2) Guardar lista de tareas"):
                     copyfile("tareas", "tareas_def")
                     time.sleep(1)
@@ -514,8 +515,16 @@ def cargarTarea(task):
     with open('tareas', 'w') as fp:
         json.dump(tasks, fp)
     st.success("¡Se ha guardado la tarea "+task.name)
-    st.markdown("#### Tareas visuales cargadas hasta el momento")
-    st.json(tasks)
+    #st.markdown("#### Tareas visuales cargadas hasta el momento")
+    #st.json(tasks)
+
+def mostrarTareas():
+    if os.path.exists("tareas"):
+        with open('tareas', 'r') as fp:
+            tasks = json.load(fp)
+        st.markdown("#### Tareas visuales cargadas hasta el momento")
+        st.json(tasks)
+
 
 def guardarExtraccion():
     badflag=False

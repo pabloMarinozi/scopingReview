@@ -167,3 +167,26 @@ def mostrarAvance(users_distribution):
         plt.yticks(y,list(revisions.keys()))
         plt.xticks(list(revisions.values()))
         st.pyplot(plt.show())
+    
+    sinRealizar = 0
+    conInclusion1 = 0
+    conInclusion2 = 0
+    ambasInclusiones = 0
+    for paper in Paper.objects():
+        if paper.inclusion1 is not None:
+            conInclusion1+=1
+        if paper.inclusion2 is not None:
+            conInclusion2+=1
+        if paper.inclusion1 is None and paper.inclusion2 is None:
+            sinRealizar+=1
+        if paper.inclusion1 is not None and paper.inclusion2 is not None:
+            ambasInclusiones+=1
+
+    if users_distribution:
+        st.set_option('deprecation.showPyplotGlobalUse', False)
+        eje_x = ['Inclusión1', 'Inclusión2', 'Ambas inclusiones' , 'Sin inclusiones']
+        eje_y = [conInclusion1, conInclusion2, ambasInclusiones, sinRealizar]
+        plt.bar(eje_x, eje_y)
+        plt.yticks(eje_y)
+        st.pyplot(plt.show())
+

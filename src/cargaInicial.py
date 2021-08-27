@@ -42,3 +42,6 @@ def mostrarSeccionCarga():
         if len(notdoi):
             st.error ("No se pudo ingresar " + str(len(notdoi)) + " debido a que no se conocía su doi")
             st.write(notdoi)
+
+def guardarBackUp():
+    pass
