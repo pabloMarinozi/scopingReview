@@ -149,14 +149,23 @@ def mostrarAvance(users_distribution):
         revisions[user] = 0
     cantidadRevisiones = 0
     cantidadRevisados = 0
+    incluidos = 0
+    conflictos = 0
+    soloUnaSeleccion = 0
+    excluidos = 0
     for paper in Paper.objects():
         cantidadRevisiones += 2
         if paper.inclusion1 is not None:
             revisions[paper.user_inclusion1] += 1
             cantidadRevisados += 1
-        if paper.inclusion2 is not None:
-            revisions[paper.user_inclusion2] += 1
-            cantidadRevisados += 1
+            if paper.inclusion2 is not None:
+                revisions[paper.user_inclusion2] += 1
+                cantidadRevisados += 1
+                if paper.inclusion1 and paper.inclusion2: incluidos += 1
+                if not paper.inclusion1 and not paper.inclusion2: excluidos += 1
+                if paper.inclusion1 == not paper.inclusion2: conflictos += 1
+            else: soloUnaSeleccion += 1
+
     progress = cantidadRevisados/cantidadRevisiones
     finish = st.progress(progress)
     st.write("Progreso: "+str(cantidadRevisados)+"/"+str(cantidadRevisiones)+"="+str(round(progress*100,2))+"%")
@@ -167,25 +176,11 @@ def mostrarAvance(users_distribution):
         plt.yticks(y,list(revisions.keys()))
         plt.xticks(list(revisions.values()))
         st.pyplot(plt.show())
-    
-    sinRealizar = 0
-    conInclusion1 = 0
-    conInclusion2 = 0
-    ambasInclusiones = 0
-    for paper in Paper.objects():
-        if paper.inclusion1 is not None:
-            conInclusion1+=1
-        if paper.inclusion2 is not None:
-            conInclusion2+=1
-        if paper.inclusion1 is None and paper.inclusion2 is None:
-            sinRealizar+=1
-        if paper.inclusion1 is not None and paper.inclusion2 is not None:
-            ambasInclusiones+=1
 
     if users_distribution:
         st.set_option('deprecation.showPyplotGlobalUse', False)
-        eje_x = ['Inclusión1', 'Inclusión2', 'Ambas inclusiones' , 'Sin inclusiones']
-        eje_y = [conInclusion1, conInclusion2, ambasInclusiones, sinRealizar]
+        eje_x = ['Incluidos', 'Excluidos', 'Conflictos' , 'En Revisión']
+        eje_y = [incluidos, excluidos, conflictos, soloUnaSeleccion]
         plt.bar(eje_x, eje_y)
         plt.yticks(eje_y)
         st.pyplot(plt.show())
