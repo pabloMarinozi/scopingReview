@@ -4,6 +4,7 @@ import pickle
 import json
 import random
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 import opciones as op
 import streamlit as st
@@ -150,14 +151,23 @@ def mostrarAvance(users_distribution):
         revisions[user] = 0
     cantidadRevisiones = 0
     cantidadRevisados = 0
+    incluidos = 0
+    conflictos = 0
+    soloUnaSeleccion = 0
+    excluidos = 0
     for paper in Paper.objects():
         cantidadRevisiones += 2
         if paper.inclusion1 is not None:
             revisions[paper.user_inclusion1] += 1
             cantidadRevisados += 1
-        if paper.inclusion2 is not None:
-            revisions[paper.user_inclusion2] += 1
-            cantidadRevisados += 1
+            if paper.inclusion2 is not None:
+                revisions[paper.user_inclusion2] += 1
+                cantidadRevisados += 1
+                if paper.inclusion1 and paper.inclusion2: incluidos += 1
+                if not paper.inclusion1 and not paper.inclusion2: excluidos += 1
+                if paper.inclusion1 != paper.inclusion2: conflictos += 1
+            else: soloUnaSeleccion += 1
+
     progress = cantidadRevisados/cantidadRevisiones
     finish = st.progress(progress)
     st.write("Progreso: "+str(cantidadRevisados)+"/"+str(cantidadRevisiones)+"="+str(round(progress*100,2))+"%")
@@ -168,3 +178,26 @@ def mostrarAvance(users_distribution):
         plt.yticks(y,list(revisions.keys()))
         plt.xticks(list(revisions.values()))
         st.pyplot(plt.show())
+
+    if st.checkbox("Ver Resultados Preliminares"):
+        st.set_option('deprecation.showPyplotGlobalUse', False)
+        eje_x = ['Incluidos', 'Excluidos', 'Conflictos' , 'En Revisión']
+        eje_y = [incluidos, excluidos, conflictos, soloUnaSeleccion]
+        plt.bar(eje_x, eje_y)
+        plt.yticks(eje_y)
+        st.pyplot(plt.show())
+        if st.button("Ver conflictos"):
+            dataConflictos = []
+            for paper in Paper.objects(Q(inclusion1=True) & Q(inclusion2=False)):
+                    dataConflictos.append([paper.doi, paper.user_inclusion1, paper.inclusion1, paper.user_inclusion2, paper.inclusion2])
+            for paper in Paper.objects(Q(inclusion1=False) & Q(inclusion2=True)):
+                    dataConflictos.append([paper.doi, paper.user_inclusion1, paper.inclusion1, paper.user_inclusion2, paper.inclusion2])
+            conflictosDF = pd.DataFrame(data=dataConflictos,
+                columns=("doi", "Revisor 1", "Veredicto 1","Revisor 2", "Veredicto 2"))
+            st.dataframe(conflictosDF)
+
+    
+
+
+
+
