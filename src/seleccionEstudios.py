@@ -4,6 +4,7 @@ import pickle
 import json
 import random
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 import opciones as op
 import streamlit as st
@@ -19,25 +20,30 @@ def mostrarPantallaSeleccionEstudios(user): #FALTAN CONDICIONES DE REFERENCIAS Y
         conectarBd()
         if st.checkbox("Ver avance"):
             mostrarAvance(True)
-        if os.path.exists("inclusion"): 
-            with open('inclusion', 'r') as fp:
-                #print("el archivo no se borro")
-                paper_dict = json.loads(json.load(fp)) 
-                paper = Paper.objects.get(doi=paper_dict["_id"]) 
-                if paper.inclusion1 is None: number = 1  
-                else:
-                    if paper.user_inclusion1 == user or paper.inclusion2 is not None:
-                        os.remove("inclusion")
-                        paper, number = elegirPaper(user)
-                    with open('inclusion', 'w') as fp: 
-                        json.dump(paper.to_json(), fp)
-                    number=2
+        if os.path.exists("inclusion"):
+            try:
+                with open('inclusion', 'r') as fp:
+                    paper_dict = json.loads(json.load(fp))
+                    paper = Paper.objects.get(doi=paper_dict["_id"])
+                    if paper.inclusion1 is None: number = 1
+                    else:
+                        if paper.user_inclusion1 == user or paper.inclusion2 is not None:
+                            os.remove("inclusion")
+                            paper, number = elegirPaper(user)
+                        with open('inclusion', 'w') as fp:
+                            json.dump(paper.to_json(), fp)
+                        number=2
+            except: #el archivo inclusion está corrupto y se debe eliminar 
+                os.remove("inclusion")
+                paper = None
         else:
             paper, number = elegirPaper(user)
-            #print("eligió el paper "+paper.title)
-            with open('inclusion', 'w') as fp:
-                json.dump(paper.to_json(), fp)
-        if paper is not None:
+            if paper is not None:
+                with open('inclusion', 'w') as fp:
+                    json.dump(paper.to_json(), fp)
+        if paper is None:
+            st.error("No existen más papers en la base de datos que usted pueda verificar sin introducir un sesgo en el review.")
+        else:
             show_warning = False
             if paper.on_revision is not None: st.success("Este paper fue recuperado de una sesión incompleta anterior.") #muestra mensaje de exito
             else:
@@ -118,10 +124,6 @@ def mostrarPantallaSeleccionEstudios(user): #FALTAN CONDICIONES DE REFERENCIAS Y
                     paper.save() 
                     os.remove("inclusion") 
                 st.json(paper.to_json())
-                
-        else: 
-            st.error("No existen más papers en la base de datos que usted pueda verificar sin introducir un sesgo en el review.")#mensaje de error 
-       
 #@st.cache(allow_output_mutation=True)                    
 def elegirPaper(user):
     papers = list(Paper.objects(on_revision=user))
@@ -163,7 +165,7 @@ def mostrarAvance(users_distribution):
                 cantidadRevisados += 1
                 if paper.inclusion1 and paper.inclusion2: incluidos += 1
                 if not paper.inclusion1 and not paper.inclusion2: excluidos += 1
-                if paper.inclusion1 == not paper.inclusion2: conflictos += 1
+                if paper.inclusion1 != paper.inclusion2: conflictos += 1
             else: soloUnaSeleccion += 1
 
     progress = cantidadRevisados/cantidadRevisiones
@@ -177,11 +179,25 @@ def mostrarAvance(users_distribution):
         plt.xticks(list(revisions.values()))
         st.pyplot(plt.show())
 
-    if users_distribution:
+    if st.checkbox("Ver Resultados Preliminares"):
         st.set_option('deprecation.showPyplotGlobalUse', False)
         eje_x = ['Incluidos', 'Excluidos', 'Conflictos' , 'En Revisión']
         eje_y = [incluidos, excluidos, conflictos, soloUnaSeleccion]
         plt.bar(eje_x, eje_y)
         plt.yticks(eje_y)
         st.pyplot(plt.show())
+        if st.button("Ver conflictos"):
+            dataConflictos = []
+            for paper in Paper.objects(Q(inclusion1=True) & Q(inclusion2=False)):
+                    dataConflictos.append([paper.doi, paper.user_inclusion1, paper.inclusion1, paper.user_inclusion2, paper.inclusion2])
+            for paper in Paper.objects(Q(inclusion1=False) & Q(inclusion2=True)):
+                    dataConflictos.append([paper.doi, paper.user_inclusion1, paper.inclusion1, paper.user_inclusion2, paper.inclusion2])
+            conflictosDF = pd.DataFrame(data=dataConflictos,
+                columns=("doi", "Revisor 1", "Veredicto 1","Revisor 2", "Veredicto 2"))
+            st.dataframe(conflictosDF)
+
+    
+
+
+
 
