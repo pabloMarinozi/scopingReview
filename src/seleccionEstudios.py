@@ -195,6 +195,13 @@ def mostrarAvance(users_distribution):
             conflictosDF = pd.DataFrame(data=dataConflictos,
                 columns=("doi", "Revisor 1", "Veredicto 1","Revisor 2", "Veredicto 2"))
             st.dataframe(conflictosDF)
+        if st.button("Ver incluidos"):
+            dataIncluidos = []
+            for paper in Paper.objects(Q(inclusion1=True) & Q(inclusion2=True)):
+                    dataIncluidos.append([paper.doi, paper.title, paper.user_inclusion1, paper.user_inclusion2])
+            incluidosDF = pd.DataFrame(data=dataIncluidos,
+                columns=("doi", "Título", "Revisor 1","Revisor 2"))
+            st.dataframe(incluidosDF)
 
     
 

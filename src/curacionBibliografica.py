@@ -43,40 +43,44 @@ def automatizarCarga(papers):
                 paper.publication_year = test['created']['date-parts'][0][0]
             
             #Guardando Autores y autores affiliation
-            affiliation_list =[]
-            for autor in test['author']:
-                name_author = autor['given'] + ' ' + autor['family']
-                try:
-                    author_ = Author.objects.get(name = name_author)
-                except Author.MultipleObjectsReturned:
-                    f.write("Hubo un problema con el Autor: " + name_author + "\n")
-                    continue
-                except Author.DoesNotExist:
-                    if 'ORCID' in autor and 'authenticated-orcid' in autor:
-                        author_ = Author(orcid = autor['ORCID'], authenticated_orcid = autor['authenticated-orcid'], 
-                                        name = name_author, familyName= autor['family'], firstName = autor['given']).save()
-                        f.write("Se guardó el Autor: " + name_author + "\n")
+            if 'author' in test:
+                affiliation_list =[]
+                for autor in test['author']:
+                    try:
+                        name_author = autor['given'] + ' ' + autor['family']
+                    except:
+                        continue
+                    try:
+                        author_ = Author.objects.get(name = name_author)
+                    except Author.MultipleObjectsReturned:
+                        f.write("Hubo un problema con el Autor: " + name_author + "\n")
+                        continue
+                    except Author.DoesNotExist:
+                        if 'ORCID' in autor and 'authenticated-orcid' in autor:
+                            author_ = Author(orcid = autor['ORCID'], authenticated_orcid = autor['authenticated-orcid'], 
+                                            name = name_author, familyName= autor['family'], firstName = autor['given']).save()
+                            f.write("Se guardó el Autor: " + name_author + "\n")
+                        else:
+                            author_ = Author(name = name_author, familyName= autor['family'], firstName = autor['given']).save()
+                            f.write("Se guardó el Autor: " + name_author + "\n")
+
+                    if autor['affiliation'] != []:
+                        for institucion in autor['affiliation']:
+                            try:
+                                institution_ = Institution.objects.get(name = institucion['name'])
+                            except Institution.MultipleObjectsReturned:
+                                f.write("Hubo un problema con la Institución : " + institucion['name'] + "\n")
+                                continue
+                            except Institution.DoesNotExist:
+                                f.write("Se guardó la Institución : " + institucion['name'] + "\n")
+                                institution_ = Institution(name = institucion['name']).save()
+                            affiliation = Author_Affiliation(institution = institution_ , author = author_, sequence = autor['sequence'])
+                            affiliation_list.append(affiliation)
                     else:
-                        author_ = Author(name = name_author, familyName= autor['family'], firstName = autor['given']).save()
-                        f.write("Se guardó el Autor: " + name_author + "\n")
-
-                if autor['affiliation'] != []:
-                    for institucion in autor['affiliation']:
-                        try:
-                            institution_ = Institution.objects.get(name = institucion['name'])
-                        except Institution.MultipleObjectsReturned:
-                            f.write("Hubo un problema con la Institución : " + institucion['name'] + "\n")
-                            continue
-                        except Institution.DoesNotExist:
-                            f.write("Se guardó la Institución : " + institucion['name'] + "\n")
-                            institution_ = Institution(name = institucion['name']).save()
-                        affiliation = Author_Affiliation(institution = institution_ , author = author_, sequence = autor['sequence'])
+                        affiliation = Author_Affiliation(author = author_, sequence = autor['sequence'])
                         affiliation_list.append(affiliation)
-                else:
-                    affiliation = Author_Affiliation(author = author_, sequence = autor['sequence'])
-                    affiliation_list.append(affiliation)
 
-            paper.author_affiliations = affiliation_list
+                paper.author_affiliations = affiliation_list
 
             #Obteniendo Finantial_Institution
             funder_list = []
