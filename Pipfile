@@ -10,6 +10,7 @@ matplotlib = "*"
 streamlit = "*"
 requests = "*"
 dnspython = "*"
+bs4 = "*"
 
 [dev-packages]
 
