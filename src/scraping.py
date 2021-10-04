@@ -42,14 +42,7 @@ def get_links(url, cont):
         # with open('../output/'+'soup'+str(cont)+'.txt', 'w') as f:
         #     f.write(str(soup))
         # cont = cont - 1
-        doi = re.findall("10\.\d{3,9}\/[a-zA-Z0-9-._;():/]+", resp.text)
-        doi_clean = set(doi).tolist()
-        if len(doi_clean):
-            print(doi_clean[0])
-            return doi_clean[0]
-        else:
-            print('error')
-            return None
+
 
 def get_doi(url):
     result = requests.get(
@@ -57,10 +50,15 @@ def get_doi(url):
         headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
     })
-    doc = BeautifulSoup(result.text, "html.parser")
-    doi = doc.find_all(re.compile("/10.\d{3,9}\/[-._;()/:A-Z0-9]+/i"))
+    doi = re.findall("10\.\d{3,9}\/[a-zA-Z0-9-._;():/]+", result.text)
+    doi_clean = set(doi).tolist()
+    if len(doi_clean):
+        print(doi_clean[0])
+        return doi_clean[0]
+    else:
+        print('error')
+        return None
 
-    return doi
 
 def main():
     # phrase = "Early detection of grapevine leafroll disease in a red-berried wine grape cultivar using hyperspectral imaging"
