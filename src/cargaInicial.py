@@ -43,5 +43,5 @@ def mostrarSeccionCarga():
             st.error ("No se pudo ingresar " + str(len(notdoi)) + " debido a que no se conocía su doi")
             st.write(notdoi)
 
-def guardarBackUp():
-    pass
+def obtenerCitaciones():
+    st.success("Acá va la lógica para obtener el link de todos los DOI que han citado que se está estudiando actualmente.")

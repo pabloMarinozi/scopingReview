@@ -116,15 +116,15 @@ def mostrarPantallaSeleccionEstudios(user): #FALTAN CONDICIONES DE REFERENCIAS Y
                     if number == 2:
                         paper.inclusion2 = True
                         paper.user_inclusion2 = user
-                        if comments is not None: paper.comments2 = comments 
-                    st.success("Se ha guardado su decisión de incluir el artículo "+ paper.title) 
+                        if comments is not None: paper.comments2 = comments
+                    st.success("Se ha guardado su decisión de incluir el artículo "+ paper.title)
                 paper.save()
-                if st.button("Revisar otro paper"): 
-                    del paper.on_revision 
-                    paper.save() 
-                    os.remove("inclusion") 
+                if st.button("Revisar otro paper"):
+                    del paper.on_revision
+                    paper.save()
+                    os.remove("inclusion")
                 st.json(paper.to_json())
-#@st.cache(allow_output_mutation=True)                    
+#@st.cache(allow_output_mutation=True)
 def elegirPaper(user):
     papers = list(Paper.objects(on_revision=user))
     if papers:
