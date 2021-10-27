@@ -18,5 +18,5 @@ caracteristicas
 src/__pycache__
 src/inclusiones.py
 src/datosConexion.py
-./output
+output
 

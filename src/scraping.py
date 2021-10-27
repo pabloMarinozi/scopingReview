@@ -22,7 +22,7 @@ def citations(phrase):
 
 def set_inclusion():
     conectarBd()
-    papers = Paper.objects()[0:20]
+    papers = Paper.objects()[21:50]
     print(len(papers))
     for paper in papers:
         paper.inclusion1 = True
@@ -30,18 +30,17 @@ def set_inclusion():
         # print(paper.doi)
         paper.save()
 
-def get_links(url, cont):
-    while cont > 0:
-        parser = 'html.parser'  # or 'lxml' (preferred) or 'html5lib', if installed
-        resp = requests.get(
-                url,
-                headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
-            })
-        #soup = BeautifulSoup(resp.text, parser)
-        # with open('../output/'+'soup'+str(cont)+'.txt', 'w') as f:
-        #     f.write(str(soup))
-        # cont = cont - 1
+def get_links(url):
+
+    parser = 'html.parser'  # or 'lxml' (preferred) or 'html5lib', if installed
+    resp = requests.get(
+            url,
+            headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
+        })
+    soup = BeautifulSoup(resp.text, parser)
+    list_string = soup.find_all('div',id="gs_res_ccl_mid")
+
 
 
 def get_doi(url):
@@ -60,15 +59,18 @@ def get_doi(url):
         return None
 
 
-def main():
+def get_citations(papers):
     # phrase = "Early detection of grapevine leafroll disease in a red-berried wine grape cultivar using hyperspectral imaging"
     #set_inclusion()
     papers = get_papers()
-    urls = []
+    doi_citations = []
     cont = len(papers)
     for paper in papers:
         url = citations(paper.title)
-        urls.append(url)
-        links = get_links(url, cont)
+        #urls.append(url)
+        links = get_links(url)
+        for link in links:
+            doi_citations.append(get_doi(link))
+    return doi_citations
 
-main()
+get_citations()
