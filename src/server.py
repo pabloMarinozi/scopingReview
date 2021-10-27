@@ -15,7 +15,8 @@ import opciones as op
 from seleccionEstudios import mostrarPantallaSeleccionEstudios
 from curacionBibliografica import automatizarCarga, mostrarPantallaCuracionBibliografica
 from extraccionDeDatos import mostrarSeccionExtracción
-from cargaInicial import obtenerCitaciones, mostrarSeccionCarga
+from cargaInicial import mostrarSeccionCarga
+from obtenerCitaciones import obtenerCitaciones
 
 #preprocesamiento
 # if os.path.exists("affiliations"): os.remove("affiliations")

@@ -12,36 +12,47 @@ import re
 
 def get_papers():
     conectarBd()
-    papers = Paper.objects(Q(inclusion1=True) & Q(inclusion2=True))
+    papers = Paper.objects(Q(inclusion1=True) & Q(inclusion2=True) & Q(citationsWanted__exists=False))
     return papers
 
-def citations(phrase):
+def get_scholarlink(phrase):
     link = sch.scholar(phrase[:-1])
     print(link)
     return link
 
+def get_beautifulsoup(url):
+    """ Me devuelve un objeto beautiful soup del url que obtiene como parámetro."""
+
+    parser = 'html.parser'  # or 'lxml' (preferred) or 'html5lib', if installed
+    resp = requests.get(
+            url,
+            headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
+        })
+    soup = BeautifulSoup(resp.text, parser)
+
+    return soup
+
 def set_inclusion():
     conectarBd()
-    papers = Paper.objects()[0:20]
+    papers = Paper.objects()[21:23]
     print(len(papers))
     for paper in papers:
         paper.inclusion1 = True
         paper.inclusion2 = True
+        paper.citationsWanted = False
         # print(paper.doi)
         paper.save()
 
-def get_links(url, cont):
-    while cont > 0:
-        parser = 'html.parser'  # or 'lxml' (preferred) or 'html5lib', if installed
-        resp = requests.get(
-                url,
-                headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
-            })
-        #soup = BeautifulSoup(resp.text, parser)
-        # with open('../output/'+'soup'+str(cont)+'.txt', 'w') as f:
-        #     f.write(str(soup))
-        # cont = cont - 1
+def get_pages(pages):
+    """Obtiene los links de todas las páginas de citaciones dado el link de la priemr página."""
+
+    return pages
+
+def get_links(bs):
+    """Navegamos el árbol hasta conseguir todos los links"""
+
+    return links
 
 def get_doi(url):
     result = requests.get(
@@ -58,15 +69,21 @@ def get_doi(url):
         print('error')
         return None
 
-def main():
+def get_citations(papers):
     # phrase = "Early detection of grapevine leafroll disease in a red-berried wine grape cultivar using hyperspectral imaging"
     #set_inclusion()
-    papers = get_papers()
-    urls = []
+    all_dois = set()
     cont = len(papers)
     for paper in papers:
-        url = citations(paper.title)
-        urls.append(url)
-        links = get_links(url, cont)
-
-main()
+        url = get_scholarlink(paper.title)
+        paper.citationsSearched = True
+        bs = get_beautifulsoup(url)
+        pages = [bs]
+        pages = get_pages(pages)
+        #get_pages
+        for page in pages:
+            links = get_links(bs, cont)
+            for link in links:
+                dois = get_doi(link)
+                paper.citedBy = dois
+                all_dois.add(dois)
