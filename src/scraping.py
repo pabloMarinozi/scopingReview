@@ -49,8 +49,9 @@ def get_pages(pages):
     bs = pages[0]
     array = bs.find_all('a', class_ = 'gs_nma')
     for row in array:
-        print('https://scholar.google.com'+row['href'])
-    #return pages
+        aux = get_beautifulsoup('https://scholar.google.com'+row['href'])
+        pages.append(aux)
+    return pages
 
 def get_links(bs):
     """Navegamos el árbol hasta conseguir todos los links"""
@@ -102,16 +103,4 @@ def get_citations(papers):
                 dois = get_doi(link)
                 paper.citedBy = dois
                 all_dois.add(dois)
-
-if __name__ == "__main__":
-    # phrase = "Early detection of grapevine leafroll disease in a red-berried wine grape cultivar using hyperspectral imaging"
-    # url = get_scholarlink(phrase)
-    url = 'http://scholar.google.com/scholar?cites=1843156135598356389&as_sdt=2005&sciodt=0,5&hl=en'
-    bs = get_beautifulsoup(url)
-    # save_bs(bs)
-    links = get_links(bs)
-    print(links)
-    for link in links:
-        dois = get_doi(link)
-    pages = [bs]
-    pages = get_pages(pages)
+    return all_dois
