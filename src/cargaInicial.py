@@ -29,13 +29,13 @@ def mostrarSeccionCarga():
             isOnlyReference = False
             loaded+=1
             my_bar.progress(loaded/total)
-            if doi is None: 
+            if doi is None:
                 notdoi.append(title)
                 continue
             abstract = fields.get("abstract","")
             paper = Paper(title = title, doi = doi , abstract = abstract, isOnlyReference = isOnlyReference).save()
             papers.append(paper)
-            
+
         after = len(Paper.objects)
         st.success("Se ingresaron "+ str(after-before) + " papers a la base de datos")
         st.write([x.title for x in papers])
@@ -43,5 +43,3 @@ def mostrarSeccionCarga():
             st.error ("No se pudo ingresar " + str(len(notdoi)) + " debido a que no se conocía su doi")
             st.write(notdoi)
 
-def guardarBackUp():
-    pass

@@ -83,6 +83,8 @@ class Paper(Document):
     research_goal = ListField(StringField())
     practical_contibution = StringField()
     isOnlyReference = BooleanField()
+    citationsSearched = BooleanField()
+    citedBy = ListField(StringField())
     #isLoadedBefore = BooleanField()
     bibliographyIsLoaded = BooleanField()
     references = ListField(StringField())

@@ -15,7 +15,8 @@ import opciones as op
 from seleccionEstudios import mostrarPantallaSeleccionEstudios
 from curacionBibliografica import automatizarCarga, mostrarPantallaCuracionBibliografica
 from extraccionDeDatos import mostrarSeccionExtracción
-from cargaInicial import guardarBackUp, mostrarSeccionCarga
+from cargaInicial import mostrarSeccionCarga
+from obtenerCitaciones import obtenerCitaciones
 
 #preprocesamiento
 # if os.path.exists("affiliations"): os.remove("affiliations")
@@ -46,7 +47,7 @@ else:
         f.write(user)
         f.close()
         
-pantalla = st.sidebar.selectbox(label="Tipo de extracción", options=["Seleccionar...","Selección de Estudios",'Datos Bibliográficos',"Contenido del Paper","Carga de Búsqueda Primaria", "Descargar Base de Datos"])
+pantalla = st.sidebar.selectbox(label="Tipo de extracción", options=["Seleccionar...","Selección de Estudios",'Datos Bibliográficos',"Contenido del Paper","Carga de Búsqueda Primaria", "Obtener Citaciones"])
 
 
         
@@ -67,8 +68,8 @@ if pantalla == "Contenido del Paper":
     mostrarSeccionExtracción(user)
 if pantalla == "Carga de Búsqueda Primaria":
     mostrarSeccionCarga()
-if pantalla == "Descargar Base de Datos":
-    guardarBackUp()
+if pantalla == "Obtener Citaciones":
+    obtenerCitaciones()
 
 
 

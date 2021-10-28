@@ -15,7 +15,7 @@ from crossref_commons.types import EntityType, OutputType
 from crossref_commons.iteration import iterate_publications_as_json
 
 def mostrarPantallaCuracionBibliografica():
-    conectarBd() 
+    conectarBd()
     papers = Paper.objects(Q(inclusion1=True) & Q(inclusion2=True) & Q(bibliographyIsLoaded__exists=False))
     count_papers = len(papers)
     if count_papers > 0:
@@ -26,7 +26,7 @@ def mostrarPantallaCuracionBibliografica():
             automatizarCarga(papers)
     else:
         st.error("No hay papers disponibles para cargar en este momento.")
-    
+
 def automatizarCarga(papers):
     for paper in papers:
         with open('mensajes.txt', 'a') as f:
