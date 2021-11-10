@@ -17,14 +17,17 @@ from crossref_commons.iteration import iterate_publications_as_json
 
 def obtenerCitaciones():
     conectarBd()
-    papers = Paper.objects(Q(inclusion1=True) & Q(inclusion2=True) & Q(citationsWanted__exists=False))
+    papers = Paper.objects(Q(inclusion1=True) & Q(inclusion2=True) & Q(citationsSearched__exists=False))
     count_papers = len(papers)
     if count_papers > 0:
         st.success("Se encontraron disponibles " + str(count_papers) + " papers de los cuales obtener citaciones.")
         st.markdown("## ¿Desea buscar las citaciones ahora?")
         buscar = st.button("Buscar")
         if buscar:
-            all_dois = get_citations(papers)
+            all_dois = set()
+            cont = len(papers)
+            #for paper in papers:
+            dois = get_citations(papers)
             #st.markdown(all_dois)
             #Dar posibilidad de descargar la lista en un archivo.
     else:

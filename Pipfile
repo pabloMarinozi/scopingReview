@@ -103,5 +103,3 @@ Pipfile = "*"
 [requires]
 python_version = "3.8"
 
-[packages.e54e73a]
-path = "./mongoengine"

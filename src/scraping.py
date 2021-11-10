@@ -44,13 +44,34 @@ def set_inclusion():
         # print(paper.doi)
         paper.save()
 
-def get_pages(pages):
+def get_pages(url):
     """Obtiene los links de todas las páginas de citaciones dado el link de la primer página."""
-    bs = pages[0]
-    array = bs.find_all('a', class_ = 'gs_nma')
-    for row in array:
-        aux = get_beautifulsoup('https://scholar.google.com'+row['href'])
-        pages.append(aux)
+    
+    #Hace una búsqueda en anchura para encontrar todas las páginas de citas
+    print(url)
+    seen = set([url])
+    active = set([url])
+    while active:
+        next_active = set()
+        for url in active:
+            try: page = get_beautifulsoup(url)
+            except: continue
+            tags = page.find_all('a', class_ = 'gs_nma')
+            for tag in tags:
+                tag = 'https://scholar.google.com'+tag['href']
+                if tag not in seen:
+                    seen.add(tag)
+                    next_active.add(tag)
+        active = next_active
+
+    #Crea un objeto beautifulsoup para cada página
+    pages=[]
+    print(len(seen),"páginas encontradas")
+    for url in seen:
+        try: 
+            page = get_beautifulsoup(url)
+            pages.append(page)
+        except: continue
     return pages
 
 def get_links(bs):
@@ -86,21 +107,21 @@ def get_doi(url):
         print('error')
         return None
 
-def get_citations(papers):
+def get_citations(paper):
     # phrase = "Early detection of grapevine leafroll disease in a red-berried wine grape cultivar using hyperspectral imaging"
     #set_inclusion()
-    all_dois = set()
-    cont = len(papers)
-    for paper in papers:
-        url = get_scholarlink(paper.title)
-        paper.citationsSearched = True
-        bs = get_beautifulsoup(url)
-        pages = [bs]
-        pages = get_pages(pages)
-        for page in pages:
-            links = get_links(page)
-            for link in links:
-                dois = get_doi(link)
-                paper.citedBy = dois
-                all_dois.add(dois)
-    return all_dois
+    pages = get_pages("https://scholar.google.com.ar/scholar?cites=13461798803717909848&as_sdt=2005&sciodt=0,5&hl=es")
+    # all_dois = set()
+    # url = get_scholarlink(paper.title)
+    # if not url:
+    #     continue 
+    # paper.citationsSearched = True
+    # pages = get_pages(url)
+    # print(pages)
+    # for page in pages:
+    #     links = get_links(page)
+    #     for link in links:
+    #         dois = get_doi(link)
+    #         paper.citedBy = dois
+    #         all_dois.add(dois)
+    # return all_dois

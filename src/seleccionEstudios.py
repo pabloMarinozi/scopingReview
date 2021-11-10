@@ -151,6 +151,7 @@ def mostrarAvance(users_distribution):
         revisions[user] = 0
     cantidadRevisiones = 0
     cantidadRevisados = 0
+    cantidadSinRevisar = 0
     incluidos = 0
     conflictos = 0
     soloUnaSeleccion = 0
@@ -161,16 +162,26 @@ def mostrarAvance(users_distribution):
             revisions[paper.user_inclusion1] += 1
             cantidadRevisados += 1
             if paper.inclusion2 is not None:
-                revisions[paper.user_inclusion2] += 1
-                cantidadRevisados += 1
-                if paper.inclusion1 and paper.inclusion2: incluidos += 1
-                if not paper.inclusion1 and not paper.inclusion2: excluidos += 1
-                if paper.inclusion1 != paper.inclusion2: conflictos += 1
+                if paper.user_inclusion2==paper.user_inclusion1:
+                    del paper.inclusion2
+                    del paper.user_inclusion2
+                    del paper.criteria_inclusion2
+                    del paper.comments2
+                    soloUnaSeleccion += 1
+                    paper.save()
+                else:
+                    revisions[paper.user_inclusion2] += 1
+                    cantidadRevisados += 1
+                    if paper.inclusion1 and paper.inclusion2: incluidos += 1
+                    if not paper.inclusion1 and not paper.inclusion2: excluidos += 1
+                    if paper.inclusion1 != paper.inclusion2: conflictos += 1
             else: soloUnaSeleccion += 1
+        else: cantidadSinRevisar += 1
 
     progress = cantidadRevisados/cantidadRevisiones
     finish = st.progress(progress)
     st.write("Progreso: "+str(cantidadRevisados)+"/"+str(cantidadRevisiones)+"="+str(round(progress*100,2))+"%")
+    st.write("Sin Revisar: "+str(cantidadSinRevisar))
     if users_distribution:
         st.set_option('deprecation.showPyplotGlobalUse', False)
         y = np.arange(len(users))
