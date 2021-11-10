@@ -133,7 +133,7 @@ def elegirPaper(user):
         else: number=2
         #print("opcion1")
         return paper,number
-    papers = list(Paper.objects(Q(inclusion2__exists=False) & Q(user_inclusion1__ne=user) & Q(on_revision__exists=False) & Q(isOnlyReference=False)))
+    papers = list(Paper.objects(Q(inclusion2__exists=False) & Q(user_inclusion1__ne=user) & Q(on_revision__exists=False) & (Q(isOnlyReference=False)| Q(isOnlyReference__exists=False))))
     if papers:
         paper = random.choice(papers)
         if paper.inclusion1 is None: number = 1
@@ -156,7 +156,8 @@ def mostrarAvance(users_distribution):
     conflictos = 0
     soloUnaSeleccion = 0
     excluidos = 0
-    for paper in Paper.objects():
+    for paper in Paper.objects(Q(isOnlyReference=False) | Q(isOnlyReference__exists=False)):
+        isOnlyReference = False #por las dudas que quede algun paper cargado desde antes de que exista este atributo
         cantidadRevisiones += 2
         if paper.inclusion1 is not None:
             revisions[paper.user_inclusion1] += 1

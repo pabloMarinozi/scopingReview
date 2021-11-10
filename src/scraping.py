@@ -67,11 +67,14 @@ def get_pages(url):
     #Crea un objeto beautifulsoup para cada página
     pages=[]
     print(len(seen),"páginas encontradas")
+    textfile = open("urls", "w")
     for url in seen:
+        textfile.write(url + "\n")
         try: 
             page = get_beautifulsoup(url)
             pages.append(page)
         except: continue
+    textfile.close()
     return pages
 
 def get_links(bs):
@@ -110,7 +113,8 @@ def get_doi(url):
 def get_citations(paper):
     # phrase = "Early detection of grapevine leafroll disease in a red-berried wine grape cultivar using hyperspectral imaging"
     #set_inclusion()
-    pages = get_pages("https://scholar.google.com.ar/scholar?cites=13461798803717909848&as_sdt=2005&sciodt=0,5&hl=es")
+    pages = get_pages("https://scholar.google.com.ar/scholar?cites=4991506072918913408&as_sdt=2005&sciodt=0,5&hl=es")
+    return pages
     # all_dois = set()
     # url = get_scholarlink(paper.title)
     # if not url:

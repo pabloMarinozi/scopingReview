@@ -24,11 +24,13 @@ def obtenerCitaciones():
         st.markdown("## ¿Desea buscar las citaciones ahora?")
         buscar = st.button("Buscar")
         if buscar:
-            all_dois = set()
-            cont = len(papers)
-            #for paper in papers:
-            dois = get_citations(papers)
-            #st.markdown(all_dois)
-            #Dar posibilidad de descargar la lista en un archivo.
+            st.error("Este módulo aún se encuentra en desarrollo.")
+            # all_dois = set()
+            # cont = len(papers)
+            # #for paper in papers:
+            # dois = get_citations(papers)
+            # st.success("Se encontraron "+str(len(dois))+" páginas de citaciones")
+            # #st.markdown(all_dois)
+            # #Dar posibilidad de descargar la lista en un archivo.
     else:
         st.error("No hay papers disponibles para buscar citaciones.")

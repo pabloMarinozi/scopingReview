@@ -28,13 +28,25 @@ def mostrarPantallaCuracionBibliografica():
         st.error("No hay papers disponibles para cargar en este momento.")
 
 def automatizarCarga(papers):
+    papers_before = len(Paper.objects)
+    authors_before = len(Author.objects)
+    inst_before = len(Institution.objects)
+    fin_inst_before = len(Finantial_Institution.objects)
+    total = len(papers)
+    inicio_msg = st.success("Se iniciará la carga de información bibliográfica de **"+str(total)+"** papers.")
+    my_bar = st.progress(.0)
+    loaded = 0
+    exitos = []
+    fallos = []
+
     for paper in papers:
         with open('mensajes.txt', 'a') as f:
             try:
                 test=get_entity(paper.doi, EntityType.PUBLICATION, OutputType.JSON)
-                st.success("Se cargará el paper con título:\n"+'**"'+test['title'][0]+'"**')
+                exitos.append(test['title'][0])
                 #st.write(test['title'][0])
             except:
+                fallos.append(paper.title)
                 f.write('Fallo la Busqueda del Paper \n')
             if test['created']['date-parts'][0][1] is not None:
                 paper.publication_month = test['created']['date-parts'][0][1]
@@ -120,7 +132,7 @@ def automatizarCarga(papers):
                         continue
                     except Paper.DoesNotExist:
                         if 'article-title' in reference_ and 'DOI' in reference_: 
-                            paper_ref = Paper(doi = reference_['DOI'], title = reference_['article-title'] , abstract = ' ').save()
+                            paper_ref = Paper(doi = reference_['DOI'], title = reference_['article-title'] , abstract = ' ', isOnlyReference=True).save()
                             f.write("Se guardó el paper de referencia: " + reference_['DOI']+ "\n")
                         else:
                             f.write("Paper de referencia no tiene title: "+ "\n")
@@ -132,6 +144,28 @@ def automatizarCarga(papers):
             paper.bibliographyIsLoaded = True
             paper.save()
             f.close()
+        loaded+=1
+        my_bar.progress(loaded/total)
+    my_bar.empty()
+    inicio_msg.empty()
+    papers_after = len(Paper.objects)
+    authors_after = len(Author.objects)
+    inst_after = len(Institution.objects)
+    fin_inst_after = len(Finantial_Institution.objects)
+    exitosDF = pd.DataFrame()
+    exitosDF["Título"] = pd.Series(exitos)
+    fallosDF = pd.DataFrame()
+    fallosDF["Título"] = pd.Series(fallos)
+    st.success("Se procesaron exitosamente **"+str(len(exitos))+"** papers")
+    st.success("Se ingresaron **"+ str(papers_after-papers_before) + " nuevas referencias** a la base de datos")
+    st.success("Se ingresaron **"+ str(authors_after-authors_before) + " nuevos autores** a la base de datos")
+    st.success("Se ingresaron **"+ str(inst_after-inst_before) + " nuevas instituciones** a la base de datos")
+    st.success("Se ingresaron **"+ str(fin_inst_after-fin_inst_before) + " nuevas instituciones financiadoras** a la base de datos")
+    st.dataframe(exitosDF)
+    st.error("La API CrossRef no tenía registros de **"+str(len(fallos))+"** papers")
+    st.dataframe(fallosDF)      
+
+
 
 def cargarInstitucion(institution,authors,authors2=""):
     affiliations = []
