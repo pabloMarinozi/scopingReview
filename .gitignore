@@ -15,9 +15,12 @@ features_def
 features
 algorithms
 caracteristicas
+mensajes.txt
+urls
 src/__pycache__
 src/inclusiones.py
 src/datosConexion.py
 ./output/
 ./output/bs.html
+.spyproject
 
